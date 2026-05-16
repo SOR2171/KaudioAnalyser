@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.sor2171"
-version = "1.0.0"
+version = "1.1.0"
 
 repositories {
     mavenCentral()
@@ -29,7 +29,7 @@ mavenPublishing {
 
         description.set(
             "KaudioAnalyser is a powerful audio analysis tool designed to provide acoustic characteristics " +
-                    "from audio flow in real-time or from audio files."
+                    "from audio flow in real-time or from audio files. For more details, please visit the GitHub repository."
         )
 
         inceptionYear.set("2026")

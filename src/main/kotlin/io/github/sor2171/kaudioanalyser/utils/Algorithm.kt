@@ -70,15 +70,27 @@ fun performFFT(
     }
 }
 
+fun applyWindow(data: FloatArray, type: WindowType) {
+    val n = data.size
+    for (i in data.indices) {
+        data[i] *= when (type) {
+            WindowType.HANNING -> 0.5f * (1f - cos(2f * PI.toFloat() * i / (n - 1)))
+            WindowType.HAMMING -> 0.54f - 0.46f * cos(2f * PI.toFloat() * i / (n - 1))
+            WindowType.RECTANGULAR -> 1.0f
+        }
+    }
+}
+
 fun Flow<ByteArray>.toAudioWindows(
     windowSize: Int = 2048,
     hopSize: Int = 1024,
-    channels: Int = 1
+    channels: Int = 1,
+    bytesPerSample: Int = 2
 ): Flow<FloatArray> = flow {
     val buffer = ArrayDeque<Float>()
 
     collect { bytes ->
-        val floats = bytes.toNormalizedFloatArray(channels)
+        val floats = bytes.toNormalizedFloatArray(channels, bytesPerSample)
         for (f in floats) buffer.addLast(f)
 
         while (buffer.size >= windowSize) {
@@ -89,29 +101,32 @@ fun Flow<ByteArray>.toAudioWindows(
     }
 }
 
-fun ByteArray.toNormalizedFloatArray(channels: Int = 1): FloatArray {
-    val bytesPerSample = 2
+fun ByteArray.toNormalizedFloatArray(
+    channels: Int = 1,
+    bytesPerSample: Int = 2
+): FloatArray {
     val frames = (this.size / bytesPerSample) / channels
     val result = FloatArray(frames)
     for (i in 0 until frames) {
-        // Just take the first channel if multichannel
         val baseIndex = i * channels * bytesPerSample
-        val low = this[baseIndex].toInt() and 0xFF
-        val high = this[baseIndex + 1].toInt()
-        val sample = ((high shl 8) or low).toShort()
 
-        result[i] = sample.toFloat() / 32768f
-    }
-    return result
-}
+        var accumulator = 0L
+        for (b in 0 until bytesPerSample) {
+            accumulator = accumulator or ((this[baseIndex + b].toLong() and 0xFFL) shl (b * 8))
+        }
 
-fun applyWindow(data: FloatArray, type: WindowType) {
-    val n = data.size
-    for (i in data.indices) {
-        data[i] *= when (type) {
-            WindowType.HANNING -> 0.5f * (1f - cos(2f * PI.toFloat() * i / (n - 1)))
-            WindowType.HAMMING -> 0.54f - 0.46f * cos(2f * PI.toFloat() * i / (n - 1))
-            WindowType.RECTANGULAR -> 1.0f
+        val bits = bytesPerSample * 8
+        result[i] = if (bytesPerSample == 1) {
+            (accumulator - 128f) / 128f
+        } else {
+            val mask = 1L shl (bits - 1)
+            val signedValue = if ((accumulator and mask) != 0L) {
+                accumulator - (1L shl bits)
+            } else {
+                accumulator
+            }
+            (signedValue.toDouble() / mask.toDouble()).toFloat()
         }
     }
+    return result
 }
