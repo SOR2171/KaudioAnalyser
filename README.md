@@ -18,6 +18,7 @@ If you want to view a demo project using KaudioAnalyser, you can check out the
 ### utils
 
 - format note name with note frequency and that of A4.
+- Conversion between sound frequency and note name.
 
 ### real-time audio analysis
 

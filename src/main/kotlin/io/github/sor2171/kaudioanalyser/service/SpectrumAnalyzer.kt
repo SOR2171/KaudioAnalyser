@@ -8,6 +8,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlin.math.log10
 import kotlin.math.sqrt
 
+/**
+ * Service that analyzes an audio buffer and updates a StateFlow with the computed frequency spectrum.
+ * It computes the magnitude spectrum in decibels (dB) and normalizes it to a 0.0 - 1.0 range for UI visualization.
+ *
+ * @param bufferSize The size of the audio buffer to analyze (must be a power of 2).
+ */
 class SpectrumAnalyzer(private val bufferSize: Int) {
     init {
         require((bufferSize and (bufferSize - 1)) == 0) {
@@ -26,6 +32,12 @@ class SpectrumAnalyzer(private val bufferSize: Int) {
     private val minDb = -80f
     private val maxDb = 0f
 
+    /**
+     * Processes a single window of audio samples, computes the magnitude spectrum in decibels (dB),
+     * normalizes the values, and updates [spectrumState].
+     *
+     * @param floatWindow The array of audio samples (size must equal [bufferSize]).
+     */
     fun processAudioWindow(floatWindow: FloatArray) {
         if (floatWindow.size != bufferSize) return
 

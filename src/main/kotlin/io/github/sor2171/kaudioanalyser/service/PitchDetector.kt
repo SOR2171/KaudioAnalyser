@@ -6,6 +6,14 @@ import io.github.sor2171.kaudioanalyser.utils.performFFT
 import kotlin.math.abs
 import kotlin.math.sqrt
 
+/**
+ * Service for detecting the pitch (fundamental frequency) of an audio signal.
+ * Supports FFT-based detection with Harmonic Product Spectrum (HPS) and the YIN autocorrelation algorithm.
+ *
+ * @property sampleRate The sampling rate of the audio data in Hz (defaults to 44100).
+ * @property bufferSize The size of the audio buffer used for detection (defaults to 2048, must be a power of 2).
+ * @property windowType The window function applied to the audio buffer.
+ */
 class PitchDetector(
     private val sampleRate: Int = 44100,
     private val bufferSize: Int = 2048,
@@ -21,7 +29,12 @@ class PitchDetector(
     private val cmndf = FloatArray(bufferSize / 2)
 
 
-    // FFT-based pitch detection with HPS
+    /**
+     * Detects the pitch of the given audio data using an FFT-based approach refined by Harmonic Product Spectrum (HPS).
+     *
+     * @param audioData The normalized input float audio samples.
+     * @return The detected fundamental frequency in Hz, or 0f if no pitch is detected or the signal is too quiet.
+     */
     fun detectPitch(audioData: FloatArray): Float {
         // RMS
         var sumSquares = 0f
@@ -37,6 +50,12 @@ class PitchDetector(
         return findPrimaryFrequency()
     }
 
+    /**
+     * Refines and extracts the primary frequency from the FFT buffers using Harmonic Product Spectrum (HPS)
+     * and parabolic interpolation.
+     *
+     * @return The refined fundamental frequency in Hz.
+     */
     private fun findPrimaryFrequency(): Float {
         val halfSize = bufferSize / 2
         var maxMagnitude = 0f
@@ -86,7 +105,12 @@ class PitchDetector(
         return refinedIndex * sampleRate / bufferSize
     }
 
-    // YIN Algorithm for pitch detection
+    /**
+     * Detects the pitch of the given audio data using the YIN algorithm.
+     *
+     * @param audio The input float audio samples.
+     * @return The detected fundamental frequency in Hz, or 0f if no pitch is detected.
+     */
     fun detectPitchYIN(audio: FloatArray): Float {
         applyWindow(audio, windowType)
 
@@ -141,6 +165,13 @@ class PitchDetector(
         return sampleRate / betterTau
     }
 
+    /**
+     * Performs parabolic interpolation on the Cumulative Mean Normalized Difference Function (CMNDF)
+     * to refine the lag estimate (tau) for more precise frequency calculation.
+     *
+     * @param tau The initial integer lag estimate.
+     * @return The refined floating-point lag estimate.
+     */
     private fun parabolicInterpolation(tau: Int): Float {
 
         if (tau <= 0 || tau >= cmndf.size - 1) {

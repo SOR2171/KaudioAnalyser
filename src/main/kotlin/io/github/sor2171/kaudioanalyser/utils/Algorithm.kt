@@ -8,10 +8,12 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * FFT for Audio
- * @param real input signal
- * @param imag usually initialized to 0
- * @param windowType choose from HAMMING, HANNING, RECTANGULAR
+ * Performs a Fast Fourier Transform (FFT) on the given complex signal.
+ *
+ * @param real The real part of the input signal, modified in-place to contain the real part of the frequency spectrum.
+ * @param imag The imaginary part of the input signal, modified in-place to contain the imaginary part of the frequency spectrum.
+ * @param windowType The type of window function to apply to the input signal before FFT.
+ * @throws IllegalArgumentException If the sizes of `real` and `imag` do not match, or if the size is not a power of 2.
  */
 fun performFFT(
     real: FloatArray,
@@ -70,6 +72,12 @@ fun performFFT(
     }
 }
 
+/**
+ * Applies a windowing function to the given data array to reduce spectral leakage.
+ *
+ * @param data The input signal array to be windowed in-place.
+ * @param type The type of window function to apply (e.g., HANNING, HAMMING, RECTANGULAR).
+ */
 fun applyWindow(data: FloatArray, type: WindowType) {
     val n = data.size
     for (i in data.indices) {
@@ -81,6 +89,15 @@ fun applyWindow(data: FloatArray, type: WindowType) {
     }
 }
 
+/**
+ * Converts a stream of raw audio bytes into a stream of overlapping windowed float arrays.
+ *
+ * @param windowSize The size of each audio window (number of samples).
+ * @param hopSize The number of samples to advance (hop) between consecutive windows.
+ * @param channels The number of audio channels in the raw byte stream.
+ * @param bytesPerSample The number of bytes per sample (e.g., 2 for 16-bit audio).
+ * @return A [Flow] of [FloatArray], where each array represents one window of normalized audio samples.
+ */
 fun Flow<ByteArray>.toAudioWindows(
     windowSize: Int = 2048,
     hopSize: Int = 1024,
@@ -101,6 +118,13 @@ fun Flow<ByteArray>.toAudioWindows(
     }
 }
 
+/**
+ * Converts a raw byte array representing audio data into a normalized float array of samples.
+ *
+ * @param channels The number of audio channels in the data (e.g., 1 for mono, 2 for stereo).
+ * @param bytesPerSample The number of bytes per sample (1 for 8-bit, 2 for 16-bit).
+ * @return A normalized [FloatArray] with values ranging from -1.0 to 1.0.
+ */
 fun ByteArray.toNormalizedFloatArray(
     channels: Int = 1,
     bytesPerSample: Int = 2
@@ -130,3 +154,21 @@ fun ByteArray.toNormalizedFloatArray(
     }
     return result
 }
+
+/**
+ * Calculates the frequency of a musical note represented by a string, given a base frequency and cent offset.
+ *
+ * @param base The base frequency for reference (e.g., 440.0 for A4).
+ * @param cent The fine-tuning adjustment in cents.
+ * @return The calculated frequency of the note.
+ */
+fun String.getNoteFrequency(base: Float, cent: Float) =
+    NoteNameCalculator.getFrequency(this, base, cent)
+
+/**
+ * Guesses the naming style of the note name string.
+ *
+ * @return The guessed note naming style.
+ */
+fun String.guessNoteNameStyle() =
+    NoteNameCalculator.guessNoteNameStyle(this)
