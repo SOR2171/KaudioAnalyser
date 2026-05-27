@@ -22,15 +22,15 @@ object NoteNameCalculator {
      *
      * @example
      * ```
-     * val freq1 = getFrequency("A4", 440f)      // Returns 440f
-     * val freq2 = getFrequency("C4", 440f)      // Returns ~261.63f (Middle C)
-     * val freq3 = getFrequency("A4", 440f, 50f) // Returns ~449.33f (50 cents sharper)
+     * val freq1 = getFrequency("A4", 440)      // Returns 440f
+     * val freq2 = getFrequency("c'", 440f)      // Returns ~261.63f (Middle C)
+     * val freq3 = getFrequency("A4", 440f, 50) // Returns ~449.33f (50 cents sharper)
      * ```
      */
     fun getFrequency(
         name: String,
-        base: Float,
-        cent: Float = 0f
+        base: Number = 440,
+        cent: Number = 0
     ): Float {
         var noteIndex = 0
         var octave = 4
@@ -84,11 +84,11 @@ object NoteNameCalculator {
         }
 
         val midiNote = (octave + 1) * 12 + noteIndex
-        val midiNoteFloat = midiNote + (cent / 100f)
+        val midiNoteFloat = midiNote + (cent.toFloat() / 100f)
 
         val semitonesFromA4 = midiNoteFloat - 69f
 
-        return base * 2f.pow(semitonesFromA4 / 12f)
+        return base.toFloat() * 2f.pow(semitonesFromA4 / 12f)
     }
 
     /**

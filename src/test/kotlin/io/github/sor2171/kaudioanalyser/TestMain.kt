@@ -5,6 +5,7 @@ import io.github.sor2171.kaudioanalyser.entity.NoteNameStyle
 import io.github.sor2171.kaudioanalyser.utils.Const.solfegeNamesFlat
 import io.github.sor2171.kaudioanalyser.utils.NoteNameCalculator.getFrequency
 import io.github.sor2171.kaudioanalyser.utils.NoteNameFormatter.getNoteData
+import io.github.sor2171.kaudioanalyser.utils.getNoteFrequency
 
 fun main() {
     val note = getNoteData(
@@ -39,5 +40,14 @@ fun main() {
         )
     )
     println()
-    println(getFrequency(note.name!!, 440f))
+    println(getNoteData(512, 440, NoteNameStyle.Scientific))
+    println(getFrequency(note.name!!, 440))
+    println("E3".getNoteFrequency())
+    println("E3".getNoteFrequency(432))
+    println(getFrequency("c'", 440))
+    println()
+    println(NoteData(name = "B6", a4 = 440f).fillAll())
+    println(NoteData(frequency = 1024f, a4 = 440f).fillAll())
+    println(NoteData(frequency = 1024f, a4 = 440f, style = NoteNameStyle.Helmholtz).fillAll())
+    println()
 }

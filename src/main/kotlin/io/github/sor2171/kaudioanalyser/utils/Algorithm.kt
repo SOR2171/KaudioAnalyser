@@ -162,7 +162,7 @@ fun ByteArray.toNormalizedFloatArray(
  * @param cent The fine-tuning adjustment in cents.
  * @return The calculated frequency of the note.
  */
-fun String.getNoteFrequency(base: Float, cent: Float) =
+fun String.getNoteFrequency(base: Number = 440, cent: Number = 0) =
     NoteNameCalculator.getFrequency(this, base, cent)
 
 /**
