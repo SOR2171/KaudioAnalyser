@@ -35,11 +35,41 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.sor2171:kaudioanalyser:1.2.0")
+    implementation("io.github.sor2171:kaudioanalyser:1.3.1")
 }
 ```
 
 ## How to use
+
+### utils
+
+#### frequency to NoteData
+
+```kotlin
+println(getNoteData(512, 440, NoteNameStyle.Scientific))
+// NoteData(name=C5, cent=-37.63199, frequency=512.0, a4=440.0, style=Scientific)
+```
+
+#### note name to frequency
+
+```kotlin
+val frequency1 = getFrequency("D5", 440f) // 587.3295f
+val frequency2 = "E3".getNoteFrequency() // 164.81378f
+val frequency3 = "E3".getNoteFrequency(432) // 161.81717f
+```
+
+#### note name or frequency to NoteData
+
+```kotlin
+println(NoteData(name = "B6", a4 =  440f).fillAll())
+// NoteData(name=B6, cent=0.0, frequency=1975.5334, a4=440.0, style=Scientific)
+
+println(NoteData(frequency = 1024f, a4 =  440f).fillAll())
+// NoteData(name=C6, cent=-37.63199, frequency=1024.0, a4=440.0, style=Scientific)
+
+println(NoteData(frequency = 1024f, a4 = 440f, style = NoteNameStyle.Helmholtz).fillAll())
+// NoteData(name=c''', cent=-37.63199, frequency=1024.0, a4=440.0, style=Helmholtz)
+```
 
 ### real-time audio analysis
 
