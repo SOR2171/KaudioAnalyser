@@ -18,14 +18,14 @@ kotlin {
     jvmToolchain(17)
     jvm()
 
-//    iosX64()
-//    iosArm64()
-//    iosSimulatorArm64()
-//    macosArm64()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    macosArm64()
 
-     js(IR) { browser(); nodejs() }
-     wasmJs { browser(); nodejs() }
-    
+    js(IR) { browser(); nodejs() }
+    wasmJs { browser(); nodejs() }
+
     sourceSets {
         commonMain.dependencies {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")

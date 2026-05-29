@@ -1,4 +1,4 @@
-name: Publish to Klibs
+name: Publish to Maven
 
 on:
   push:
@@ -8,6 +8,9 @@ on:
 jobs:
   publish:
     runs-on: macos-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -19,15 +22,17 @@ jobs:
           java-version: 17
           distribution: temurin
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Print Version
         run: echo "Publishing version ${{ github.ref_name }}"
 
       - name: Publish Library
-        run: ./gradlew publishAllPublicationsToKlibsRepository
+        run: ./gradlew publishAllPublicationsToMavenCentralRepository
         env:
-          env:
-            ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralUsername }}
-            ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralPassword }}
-            
-            ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKey }}
-            ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyPassword }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralUsername }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralPassword }}
+          
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKey }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyPassword }}
