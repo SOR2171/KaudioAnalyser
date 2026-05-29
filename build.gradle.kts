@@ -1,26 +1,40 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
-    kotlin("jvm") version "2.3.20"
+    kotlin("multiplatform") version "2.3.20"
     id("com.vanniktech.maven.publish") version "0.36.0"
 }
 
 group = "io.github.sor2171"
-version = "1.3.1"
+version = "1.3.3"
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
-    testImplementation(kotlin("test"))
-}
-
 kotlin {
     jvmToolchain(17)
-}
+    jvm()
 
-tasks.test {
-    useJUnitPlatform()
+//    iosX64()
+//    iosArm64()
+//    iosSimulatorArm64()
+//    macosArm64()
+
+     js(IR) { browser(); nodejs() }
+     wasmJs { browser(); nodejs() }
+    
+    sourceSets {
+        commonMain.dependencies {
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+    }
 }
 
 mavenPublishing {
