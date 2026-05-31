@@ -11,19 +11,11 @@ import kotlin.math.roundToInt
  * based on standard musical naming styles.
  */
 object NoteNameFormatter {
-    /**
-     * Converts a given frequency into formatted note data based on the specified musical naming style.
-     * 
-     * @param frequency The frequency to be converted.
-     * @param a4 The base reference frequency of A4 (e.g., 440.0).
-     * @param style The musical note naming style to apply (Scientific, Helmholtz, or Solfège).
-     * @param useSharp Indicates whether to prefer sharp (#) accidentals over flats (b). Defaults to true.
-     * @return A NoteData object containing the formatted note name, cent deviation as a Float, and the applied style.
-     */
+
     fun getNoteData(
         frequency: Number,
-        a4: Number,
-        style: NoteNameStyle,
+        a4: Number = 440,
+        style: NoteNameStyle = NoteNameStyle.Scientific,
         useSharp: Boolean = true
     ): NoteData {
         val frequencyFloat = frequency.toFloat()

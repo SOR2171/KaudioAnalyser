@@ -1,8 +1,11 @@
 package io.github.sor2171.kaudioanalyser.utils
 
 import io.github.sor2171.kaudioanalyser.entity.WindowType
+import io.github.sor2171.kaudioanalyser.service.PitchDetector
+import io.github.sor2171.kaudioanalyser.service.SpectrumAnalyzer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -172,3 +175,84 @@ fun String.getNoteFrequency(base: Number = 440, cent: Number = 0) =
  */
 fun String.guessNoteNameStyle() =
     NoteNameCalculator.guessNoteNameStyle(this)
+
+/**
+ * Collects incoming audio chunks and re-groups them into fixed-size windows.
+ *
+ * Incoming arrays may be smaller or larger than [bufferSize]. Data is copied
+ * into an internal buffer until exactly [bufferSize] samples have been accumulated,
+ * at which point a new array containing the complete window is emitted.
+ *
+ * Any remaining samples that do not fill a complete window are retained and
+ * combined with future emissions from the upstream flow.
+ *
+ * @param bufferSize The number of samples per emitted window. Must match the
+ *   processing window size expected by downstream consumers.
+ * @return A flow emitting fixed-size [FloatArray] windows of length [bufferSize].
+ */
+infix fun Flow<FloatArray>.windowedBy(
+    bufferSize: Int
+): Flow<FloatArray> = flow {
+    val processingBuffer = FloatArray(bufferSize)
+    var bufferPosition = 0
+
+    collect { incomingData ->
+        var incomingPosition = 0
+
+        while (incomingPosition < incomingData.size) {
+            val itemsToCopy = minOf(
+                bufferSize - bufferPosition,
+                incomingData.size - incomingPosition
+            )
+
+            incomingData.copyInto(
+                destination = processingBuffer,
+                destinationOffset = bufferPosition,
+                startIndex = incomingPosition,
+                endIndex = incomingPosition + itemsToCopy
+            )
+
+            bufferPosition += itemsToCopy
+            incomingPosition += itemsToCopy
+
+            if (bufferPosition == bufferSize) {
+                // 注意复制一份
+                emit(processingBuffer.copyOf())
+                bufferPosition = 0
+            }
+        }
+    }
+}
+
+/**
+ * Performs pitch detection on fixed-size audio windows.
+ *
+ * The upstream audio stream is first re-windowed using
+ * [PitchDetector.bufferSize]. Each complete window is then analyzed using
+ * [PitchDetector.detectPitchYIN].
+ *
+ * @param detector The pitch detector used to analyze each audio window.
+ * @return A flow emitting the detected pitch for each window, typically in Hz.
+ */
+infix fun Flow<FloatArray>.detectedBy(
+    detector: PitchDetector
+): Flow<Float> = windowedBy(detector.bufferSize).map { buffer ->
+    detector.detectPitchYIN(buffer)
+}
+
+/**
+ * Performs spectrum analysis on fixed-size audio windows.
+ *
+ * The upstream audio stream is first re-windowed using
+ * [SpectrumAnalyzer.bufferSize]. Each complete window is then processed using
+ * [SpectrumAnalyzer.processAudioWindow].
+ *
+ * @param analyzer The spectrum analyzer used to process each audio window.
+ * @return A flow emitting the analysis result for each window, typically a
+ *   frequency-domain representation such as FFT magnitudes.
+ */
+infix fun Flow<FloatArray>.detectedBy(
+    analyzer: SpectrumAnalyzer
+): Flow<FloatArray> = windowedBy(analyzer.bufferSize).map { buffer ->
+    analyzer.processAudioWindow(buffer)
+}

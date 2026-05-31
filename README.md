@@ -7,6 +7,12 @@ from audio flow in real-time or from audio files.
 
 This library can be used in KMP projects, and it works well with
 [Kodio](https://github.com/dosier/kodio).
+This lib support to get `Flow<Byte>` from microphone and WAV file.
+
+If you want to analyze an audio file,
+I recommend you use [FFmpegKit](https://github.com/arthenica/ffmpeg-kit),
+even though it has been retired,
+because it is still the easiest way to use FFmpeg in KMP.
 
 If you want to contribute or have any questions, please feel free to open an issue or a pull request.
 
@@ -20,12 +26,10 @@ If you want to view a demo project using KaudioAnalyser, you can check out the
 - format note name with note frequency and that of A4.
 - Conversion between sound frequency and note name.
 
-### real-time audio analysis
+### audio analysis
 
 - pitch detection based on FFT or YIN algorithm
 - spectrum analysis
-
-### file-based audio analysis
 
 ## Installation
 
@@ -35,7 +39,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.sor2171:kaudioanalyser:1.3.1")
+    implementation("io.github.sor2171:kaudioanalyser:1.4.2")
 }
 ```
 
@@ -61,17 +65,17 @@ val frequency3 = "E3".getNoteFrequency(432) // 161.81717f
 #### note name or frequency to NoteData
 
 ```kotlin
-println(NoteData(name = "B6", a4 =  440f).fillAll())
+println(NoteData(name = "B6", a4 = 440f).fillAll())
 // NoteData(name=B6, cent=0.0, frequency=1975.5334, a4=440.0, style=Scientific)
 
-println(NoteData(frequency = 1024f, a4 =  440f).fillAll())
+println(NoteData(frequency = 1024f, a4 = 440f).fillAll())
 // NoteData(name=C6, cent=-37.63199, frequency=1024.0, a4=440.0, style=Scientific)
 
 println(NoteData(frequency = 1024f, a4 = 440f, style = NoteNameStyle.Helmholtz).fillAll())
 // NoteData(name=c''', cent=-37.63199, frequency=1024.0, a4=440.0, style=Helmholtz)
 ```
 
-### real-time audio analysis
+### Audio Analyze
 
 #### pitch detection
 
@@ -136,7 +140,7 @@ var bufferSize by rememberSaveable { mutableStateOf(8192) }
 val analyzer = remember(bufferSize) { SpectrumAnalyzer(bufferSize) }
 // spectrumData is a list of pairs of frequency and magnitude,
 // you can use it to visualize the frequency spectrum.
-val spectrumData by analyzer.spectrumState.collectAsState()
+var spectrumData by remember { mutableStateOf(FloatArray(0)) }
 
 LaunchedEffect(
     isRecording,
@@ -156,7 +160,8 @@ LaunchedEffect(
                     channels = audioQuality.format.channels.count,
                     bytesPerSample = audioQuality.format.bytesPerSample
                 )?.collect { floatWindow ->
-                    analyzer.processAudioWindow(floatWindow)
+                    spectrumData = analyzer
+                        .processAudioWindow(floatWindow)
                 }
             } finally {
                 recorder.release()
@@ -166,6 +171,8 @@ LaunchedEffect(
 }
 ```
 
-### file-based audio analysis
+### Audio File Analyze
 
-nope
+#### pitch detection
+
+#### spectrum analysis

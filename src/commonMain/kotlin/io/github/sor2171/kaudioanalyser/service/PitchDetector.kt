@@ -15,19 +15,17 @@ import kotlin.math.sqrt
  * @property windowType The window function applied to the audio buffer.
  */
 class PitchDetector(
-    private val sampleRate: Int = 44100,
-    private val bufferSize: Int = 2048,
-    private val windowType: WindowType = WindowType.HANNING
+    val sampleRate: Int = 44100,
+    val bufferSize: Int = 2048,
+    val windowType: WindowType = WindowType.HANNING
 ) {
     private val realBuffer = FloatArray(bufferSize)
     private val imagBuffer = FloatArray(bufferSize)
     private val magnitudes = FloatArray(bufferSize / 2)
 
-
     private val threshold = 0.1f
     private val difference = FloatArray(bufferSize / 2)
     private val cmndf = FloatArray(bufferSize / 2)
-
 
     /**
      * Detects the pitch of the given audio data using an FFT-based approach refined by Harmonic Product Spectrum (HPS).

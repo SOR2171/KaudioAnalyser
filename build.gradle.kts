@@ -8,14 +8,14 @@ plugins {
 }
 
 group = "io.github.sor2171"
-version = "1.3.3"
+version = "1.4.2"
 
 repositories {
     mavenCentral()
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
     jvm()
 
     iosX64()
@@ -33,6 +33,11 @@ kotlin {
 
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.9.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+
+            // https://github.com/dosier/kodio
+            implementation("space.kodio:core:0.1.5")
         }
     }
 }
@@ -66,7 +71,7 @@ mavenPublishing {
         }
 
         scm {
-            connection.set("scm:git:github.com/sor2171/KaudioAnalyser.git")
+            connection.set("scm:git:https://github.com/sor2171/KaudioAnalyser.git")
             developerConnection.set("scm:git:ssh://github.com/sor2171/KaudioAnalyser.git")
             url.set("https://github.com/sor2171/KaudioAnalyser")
         }
