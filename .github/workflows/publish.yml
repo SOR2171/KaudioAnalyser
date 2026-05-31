@@ -28,6 +28,9 @@ jobs:
       - name: Print Version
         run: echo "Publishing version ${{ github.ref_name }}"
 
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
       - name: Check
         run: ./gradlew check
 
